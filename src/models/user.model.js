@@ -26,11 +26,11 @@ const userSchema= new Schema(
             index:true
         },
         avatar : {
-            type:String ,//cloudinary url
+            type: String ,//cloudinary url
             required:true,
         },
         coverImage: {
-            types : String, 
+            type : String, 
         },
         watchHistory: [
             {
@@ -53,13 +53,13 @@ const userSchema= new Schema(
 )
 
 userSchema.pre("save",async function(next) {
-    if(!this.isMOdified("password"))return next();
+    if(!this.isModified("password"))return next();
     this.password =await bcrypt.hash(this.password,10) 
     next()
 })
 
-userSchema.method.isPasswordCorrect = async function(password){
-   return await bcrypt.compare(this.password,password)
+userSchema.methods.isPasswordCorrect = async function(password){
+   return await bcrypt.compare(password,this.password)
 }
 
 userSchema.methods.generateAccessToken= function(){
@@ -77,7 +77,7 @@ userSchema.methods.generateAccessToken= function(){
         
     )
 }
-userSchema.methods.genreateRefreshToken =function(){
+userSchema.methods.generateRefreshToken =function(){
     return jwt.sign(
         {
             _id: this._id,
