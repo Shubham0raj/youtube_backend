@@ -95,7 +95,7 @@ const loginUser = asyncHandler(async (req,res)=>{
     //access and refresh token
     //send cookie
 
-    const {email,username,password} = req.body
+    const {email,username,password}=req.body
 
     if(!username &&!email){
         throw new ApiError(400,"username or emmail password is required")
@@ -174,7 +174,7 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
     try {
         const decodedToken = jwt.verify(incommingRefreshToken,process.env.REFRESH_TOKEN_SECRET)
     
-        const user = User.findById(decodedToken?._id)
+        const user =await User.findById(decodedToken?._id)
     
         if(!user){
             throw new ApiError(401, "Invalid refresh token")
@@ -189,7 +189,7 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
             secure:true,
         }
     
-        const {accessToken,newrefreshToken} = await generateAccessAndRefreshTokens(user._id)
+        const {accessToken,newrefreshToken } = await generateAccessAndRefreshTokens(user._id)
     
         return res
         .status(200)
