@@ -53,16 +53,93 @@ return res
 
 const addComment = asyncHandler(async (req, res) => {
     // TODO: add a comment to a video
+    const {videoId} = req.params
+    const {content} = req.body
+    if(!videoId || content.trim()){
+        throw new ApiError(400, "Video Id and Comment is not available")
+    }
     
-    
+    const video = await Video.findById(videoId)
+
+    if(!video){
+        throw new ApiError(400,"video not available")
+
+    }
+
+    const comment = await Comment.create({
+        comment,
+        video:videoId,
+        owner:req.user._id
+    })
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,comment,"comment added successfully")
+    )
+
 })
 
 const updateComment = asyncHandler(async (req, res) => {
     // TODO: update a comment
+    const {commentId} = req.params
+    const {newComment} = req.body
+
+    if(!newComment || !newComment.trim()){
+        throw new ApiError(400, "comment text is required ")
+    }
+    const comment = await Comment.findById(commentId)
+    if(!comment){
+        throw new ApiError(400,"comment not found")
+    }
+
+    if (comment.owner.toString() !== req.user._id.toString()) 
+        {throw new ApiError(403, "You cannot edit this comment");}
+
+
+    comment.content = newComment.trim()
+    await comment.save()
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,
+            comment,
+            "comment updated successfully"
+        )
+    )
+    
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
     // TODO: delete a comment
+    //get video
+    const {commentId} = req.params
+
+    if(!commentId){
+        throw new ApiError(400,"comment id missing")
+    }
+
+    const comment = await Comment.findById(commentId)
+
+    if(!comment){
+        throw new ApiError(400,"comment not found")
+    }
+
+    if(comment.owner.toString()!==req.user._id.toString()){
+        throw new ApiError(403,"dont have authority to delete")
+    }
+
+    await comment.deleteOne();
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,
+            {},
+            "comment deleted successfully"
+        )
+    )
 })
 
 export {
